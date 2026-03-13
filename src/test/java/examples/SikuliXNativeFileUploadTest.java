@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 
@@ -18,6 +19,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.sikuli.script.Match;
 import org.sikuli.script.Pattern;
 import org.sikuli.script.Screen;
 
@@ -69,14 +71,42 @@ class SikuliXNativeFileUploadTest {
 
         // These images must come from the native Windows/macOS file chooser dialog,
         // not from the browser page itself.
-        Pattern picturesLocation = new Pattern("src/test/resources/images/pictures.png");
+        Pattern picturesLocation = new Pattern("src/test/resources/images/pictures.png").similar(0.95f);
         Pattern fileNameInput = new Pattern("src/test/resources/images/file_name_input.png");
         Pattern openButton = new Pattern("src/test/resources/images/open_button.png");
 
         Path fileToUpload = Path.of("README.md").toAbsolutePath();
 
-        screen.wait(picturesLocation, 10);
-        screen.click(picturesLocation);
+        Match bestPicturesMatch = screen.exists(picturesLocation, 10);
+        if (bestPicturesMatch == null) {
+            System.out.printf("pictures.png: no match found at similarity %.2f%n", picturesLocation.getSimilar());
+            throw new IllegalStateException("SikuliX could not find pictures.png on screen.");
+        }
+
+        List<Match> pictureMatches = screen.findAllList(picturesLocation);
+        System.out.printf(
+                "pictures.png: found %d candidate(s); best score=%.4f at x=%d y=%d w=%d h=%d%n",
+                pictureMatches.size(),
+                bestPicturesMatch.getScore(),
+                bestPicturesMatch.x,
+                bestPicturesMatch.y,
+                bestPicturesMatch.w,
+                bestPicturesMatch.h
+        );
+        for (int i = 0; i < Math.min(3, pictureMatches.size()); i++) {
+            Match candidate = pictureMatches.get(i);
+            System.out.printf(
+                    "pictures.png: candidate[%d] score=%.4f at x=%d y=%d w=%d h=%d%n",
+                    i,
+                    candidate.getScore(),
+                    candidate.x,
+                    candidate.y,
+                    candidate.w,
+                    candidate.h
+            );
+        }
+
+        screen.click(bestPicturesMatch);
         screen.wait(fileNameInput, 10);
         screen.click(fileNameInput);
         screen.type(fileToUpload.toString());
