@@ -5,6 +5,7 @@ import java.io.ByteArrayInputStream;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
+import java.util.Objects;
 
 import javax.imageio.ImageIO;
 
@@ -68,12 +69,15 @@ class SikuliXNativeFileUploadTest {
 
         screen.wait(chooseFileButton, 10);
         screen.click(chooseFileButton); // opens native OS dialog visually
+        Thread.sleep(1500);
+        String capturePath = screen.capture().save("target/sikulix-debug", "native-dialog");
+        System.out.println("Saved native dialog capture to: " + capturePath);
 
         // These images must come from the native Windows/macOS file chooser dialog,
         // not from the browser page itself.
-        Pattern picturesLocation = new Pattern("src/test/resources/images/pictures.png").similar(0.95f);
-        Pattern fileNameInput = new Pattern("src/test/resources/images/file_name_input.png");
-        Pattern openButton = new Pattern("src/test/resources/images/open_button.png");
+        Pattern picturesLocation = resourcePattern("/images/pictures.png", 0.95f);
+        Pattern fileNameInput = resourcePattern("/images/file_name_input.png", 0.95f);
+        Pattern openButton = resourcePattern("/images/open_button.png", 0.95f);
 
         Path fileToUpload = Path.of("README.md").toAbsolutePath();
 
@@ -119,5 +123,15 @@ class SikuliXNativeFileUploadTest {
                 .getText();
 
         assertTrue(uploaded.contains("README.md"));
+    }
+
+    private Pattern resourcePattern(String resourcePath, float similarity) {
+        var resourceUrl = Objects.requireNonNull(
+                getClass().getResource(resourcePath),
+                "Missing test resource: " + resourcePath
+        );
+        Pattern pattern = new Pattern(resourceUrl).similar(similarity);
+        System.out.printf("Loaded pattern %s from %s with similarity %.2f%n", resourcePath, resourceUrl, similarity);
+        return pattern;
     }
 }
