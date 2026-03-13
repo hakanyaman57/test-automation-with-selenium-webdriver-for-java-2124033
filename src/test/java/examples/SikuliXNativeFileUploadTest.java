@@ -1,12 +1,17 @@
 package examples;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.nio.file.Path;
 import java.time.Duration;
+
+import javax.imageio.ImageIO;
 
 import org.junit.jupiter.api.AfterEach;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.OutputType;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -48,12 +53,22 @@ class SikuliXNativeFileUploadTest {
 
         driver.get("https://the-internet.herokuapp.com/upload");
 
+        // Selenium still locates the file input in the DOM.
+        // We do not click it with Selenium because some driver/browser combinations
+        // reject click() on input[type=file]. Instead, we turn its rendered pixels
+        // into a SikuliX pattern and click it visually on screen.
         WebElement fileInput = new WebDriverWait(driver, Duration.ofSeconds(10))
                 .until(ExpectedConditions.elementToBeClickable(By.id("file-upload")));
-        fileInput.click(); // opens native OS dialog
 
         Screen screen = new Screen();
+        BufferedImage chooseFileImage = ImageIO.read(new ByteArrayInputStream(fileInput.getScreenshotAs(OutputType.BYTES)));
+        Pattern chooseFileButton = new Pattern(chooseFileImage).similar(0.95f);
 
+        screen.wait(chooseFileButton, 10);
+        screen.click(chooseFileButton); // opens native OS dialog visually
+
+        // These two images must come from the native Windows/macOS file chooser dialog,
+        // not from the browser page itself.
         Pattern fileNameInput = new Pattern("src/test/resources/images/file_name_input.png");
         Pattern openButton = new Pattern("src/test/resources/images/open_button.png");
 
