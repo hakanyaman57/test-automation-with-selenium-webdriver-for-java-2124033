@@ -31,37 +31,37 @@ class SeleniumOnlyWebPageTest {
 
     @Test
     void shouldClickTheSameButtonUsingOnlySelenium() throws Exception {
-        // This version uses only Selenium.
-        // There is no pixel search and no need for SikuliX permissions.
+        // Bu sürüm yalnızca Selenium kullanır.
+        // Piksel tabanlı arama yoktur, bu yüzden SikuliX iznine ihtiyaç duymaz.
         WebDriverManager.chromedriver().setup();
 
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--start-maximized");
         driver = new ChromeDriver(options);
 
-        // We reuse the exact same local page used by the hybrid example.
-        // That makes the comparison easy during the training:
-        // same page, same button, different automation approach.
+        // Hibrit örnekte kullanılan local sayfanın aynısını tekrar kullanıyoruz.
+        // Böylece eğitim sırasında karşılaştırma kolay olur:
+        // aynı sayfa, aynı buton, farklı otomasyon yaklaşımı.
         Path demoPage = Path.of("src", "test", "resources", "pages", "sikulix-web-demo.html").toAbsolutePath();
         driver.get(demoPage.toUri().toString());
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
-        // Selenium reads the button directly from the DOM by its id.
-        // This is the key difference from SikuliX: Selenium interacts with HTML elements,
-        // not with the visual pixels rendered on the screen.
+        // Selenium butonu doğrudan DOM içinden id ile bulur.
+        // SikuliX'ten temel fark da budur:
+        // Selenium HTML elementleriyle çalışır, ekrandaki piksellerle değil.
         WebElement actionButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("sikuli-button")));
 
-        // Pause briefly so the page is visible before Selenium performs the click.
+        // Tıklamadan önce sayfanın ilk halini kısa süre görünür bırakır.
         Thread.sleep(BEFORE_CLICK_PAUSE.toMillis());
         actionButton.click();
 
-        // After the DOM click, we verify the status text changed.
+        // DOM üzerinden yapılan tıklamadan sonra durum metninin değiştiğini doğrularız.
         WebElement status = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("status")));
         assertEquals("Clicked with SikuliX", status.getText());
 
-        // Keep the browser open briefly so the result is visible during a live demo.
-        // This pause is only for presentation purposes, not for normal fast test execution.
+        // Sonucu canlı demoda görebilmek için browser'ı kısa süre açık bırakır.
+        // Bu bekleme sunum içindir; normal hızlı test akışı için gerekli değildir.
         Thread.sleep(DEMO_PAUSE.toMillis());
     }
 }

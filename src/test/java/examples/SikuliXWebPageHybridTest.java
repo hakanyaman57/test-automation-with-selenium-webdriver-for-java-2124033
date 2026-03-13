@@ -35,40 +35,40 @@ class SikuliXWebPageHybridTest {
 
     @Test
     void shouldUseSeleniumForThePageAndSikuliXForOneVisualStep() throws Exception {
-        // Selenium still opens the browser and handles normal page navigation.
+        // Selenium browser'ı açar ve normal sayfa akışını yönetir.
         WebDriverManager.chromedriver().setup();
 
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--start-maximized");
         driver = new ChromeDriver(options);
 
-        // We use a local HTML file so the demo does not depend on internet access.
+        // Demo internet bağlantısına bağlı olmasın diye local bir HTML dosyası kullanıyoruz.
         Path demoPage = Path.of("src", "test", "resources", "pages", "sikulix-web-demo.html").toAbsolutePath();
         driver.get(demoPage.toUri().toString());
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
-        // Step 1: Selenium proves that the page is loaded and the DOM is accessible.
+        // Adım 1: Selenium sayfanın açıldığını ve DOM'a erişebildiğini doğrular.
         WebElement status = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("status")));
         assertEquals("Waiting for click", status.getText());
 
-        // Step 2: Selenium finds the button in the DOM.
-        // We then take an image of the real rendered button.
-        // This image becomes the SikuliX search pattern.
+        // Adım 2: Selenium butonu DOM üzerinden bulur.
+        // Sonra bu butonun ekranda render edilmiş görüntüsünü alırız.
+        // Bu görüntü SikuliX için arama pattern'i olur.
         WebElement actionButton = driver.findElement(By.id("sikuli-button"));
         byte[] buttonBytes = actionButton.getScreenshotAs(OutputType.BYTES);
         BufferedImage buttonImage = ImageIO.read(new ByteArrayInputStream(buttonBytes));
 
-        // Step 3: SikuliX searches the actual screen for that image and clicks it.
-        // This is the "visual automation" part: SikuliX does not care about the DOM,
-        // it only looks for matching pixels on the screen.
+        // Adım 3: SikuliX bu görüntüyü gerçek ekranda arar ve tıklar.
+        // Burası "görsel otomasyon" kısmıdır:
+        // SikuliX DOM ile ilgilenmez, sadece ekrandaki piksellere bakar.
         Screen screen = new Screen();
         Pattern buttonPattern = new Pattern(buttonImage).similar(0.95f);
         screen.wait(buttonPattern, 10);
         screen.click(buttonPattern);
 
-        // Step 4: After the visual click, we go back to Selenium to verify the result.
-        // If the click worked, the page changes the status text.
+        // Adım 4: Görsel tıklamadan sonra tekrar Selenium'a dönüp sonucu doğrularız.
+        // Tıklama başarılıysa sayfadaki durum metni değişir.
         String updatedStatus = wait.until(ExpectedConditions.textToBePresentInElementLocated(
                 By.id("status"),
                 "Clicked with SikuliX")) ? driver.findElement(By.id("status")).getText() : "";

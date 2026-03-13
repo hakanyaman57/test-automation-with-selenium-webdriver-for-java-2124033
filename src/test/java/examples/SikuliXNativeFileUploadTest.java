@@ -20,6 +20,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.sikuli.script.Key;
 import org.sikuli.script.Match;
 import org.sikuli.script.Pattern;
 import org.sikuli.script.Screen;
@@ -27,13 +28,13 @@ import org.sikuli.script.Screen;
 import io.github.bonigarcia.wdm.WebDriverManager;
 
 /**
- * Real-life hybrid scenario:
- * - Selenium opens the web page and clicks "Browse"
- * - SikuliX drives the native file chooser window
+ * Gerçek hayata yakın hibrit senaryo:
+ * - Selenium web sayfasını açar
+ * - SikuliX sayfadaki "Choose File" kontrolünü görsel olarak bulur
+ * - SikuliX native dosya seçme penceresini yönetir
  *
- * This test is disabled by default because it needs an interactive desktop
- * session
- * and template images captured from your own OS theme.
+ * Bu testin sağlıklı çalışması için etkileşimli bir masaüstü oturumu ve
+ * işletim sistemi temanıza göre alınmış görsel şablonlar gerekir.
  */
 class SikuliXNativeFileUploadTest {
 
@@ -56,10 +57,11 @@ class SikuliXNativeFileUploadTest {
 
         driver.get("https://the-internet.herokuapp.com/upload");
 
-        // Selenium still locates the file input in the DOM.
-        // We do not click it with Selenium because some driver/browser combinations
-        // reject click() on input[type=file]. Instead, we turn its rendered pixels
-        // into a SikuliX pattern and click it visually on screen.
+        // Selenium file input elemanını yine DOM üzerinden bulur.
+        // Ancak bazı driver/browser kombinasyonları input[type=file] için
+        // Selenium click() çağrısını reddedebilir.
+        // Bu yüzden elemanın ekrandaki görüntüsünü alıp SikuliX pattern'ine çeviriyoruz
+        // ve tıklamayı görsel olarak yaptırıyoruz.
         WebElement fileInput = new WebDriverWait(driver, Duration.ofSeconds(10))
                 .until(ExpectedConditions.elementToBeClickable(By.id("file-upload")));
 
@@ -68,13 +70,13 @@ class SikuliXNativeFileUploadTest {
         Pattern chooseFileButton = new Pattern(chooseFileImage).similar(0.95f);
 
         screen.wait(chooseFileButton, 10);
-        screen.click(chooseFileButton); // opens native OS dialog visually
+        screen.click(chooseFileButton); // Native dosya seçme penceresini görsel olarak açar
         Thread.sleep(1500);
         String capturePath = screen.capture().save("target/sikulix-debug", "native-dialog");
         System.out.println("Saved native dialog capture to: " + capturePath);
 
-        // These images must come from the native Windows/macOS file chooser dialog,
-        // not from the browser page itself.
+        // Bu görseller browser içinden değil,
+        // native Windows/macOS dosya seçme penceresinden alınmış olmalıdır.
         Pattern picturesLocation = resourcePattern("/images/pictures.png", 0.95f);
         Pattern fileNameInput = resourcePattern("/images/file_name_input.png", 0.95f);
         Pattern openButton = resourcePattern("/images/open_button.png", 0.95f);
@@ -114,7 +116,39 @@ class SikuliXNativeFileUploadTest {
         screen.wait(fileNameInput, 10);
         screen.click(fileNameInput);
         screen.type(fileToUpload.toString());
-        screen.click(openButton);
+        Thread.sleep(1000);
+
+        Match bestOpenMatch = screen.exists(openButton, 5);
+        if (bestOpenMatch == null) {
+            System.out.printf("open_button.png: no match found at similarity %.2f%n", openButton.getSimilar());
+            System.out.println("Birçok native dosya penceresi ENTER tuşunu Open olarak kabul ettiği için ENTER ile devam ediliyor.");
+            screen.type(Key.ENTER);
+        } else {
+            List<Match> openMatches = screen.findAllList(openButton);
+            System.out.printf(
+                    "open_button.png: found %d candidate(s); best score=%.4f at x=%d y=%d w=%d h=%d%n",
+                    openMatches.size(),
+                    bestOpenMatch.getScore(),
+                    bestOpenMatch.x,
+                    bestOpenMatch.y,
+                    bestOpenMatch.w,
+                    bestOpenMatch.h
+            );
+            for (int i = 0; i < Math.min(3, openMatches.size()); i++) {
+                Match candidate = openMatches.get(i);
+                System.out.printf(
+                        "open_button.png: candidate[%d] score=%.4f at x=%d y=%d w=%d h=%d%n",
+                        i,
+                        candidate.getScore(),
+                        candidate.x,
+                        candidate.y,
+                        candidate.w,
+                        candidate.h
+                );
+            }
+
+            screen.click(bestOpenMatch);
+        }
 
         driver.findElement(By.id("file-submit")).click();
 
