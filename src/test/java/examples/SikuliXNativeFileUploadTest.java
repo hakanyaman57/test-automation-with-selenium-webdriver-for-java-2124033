@@ -1,5 +1,6 @@
 package examples;
 
+import examples.pages.FileUploadPage;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.nio.file.Path;
@@ -9,23 +10,15 @@ import java.util.Objects;
 
 import javax.imageio.ImageIO;
 
-import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.By;
 import org.openqa.selenium.OutputType;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.sikuli.script.Key;
 import org.sikuli.script.Match;
 import org.sikuli.script.Pattern;
 import org.sikuli.script.Screen;
-
-import io.github.bonigarcia.wdm.WebDriverManager;
 
 /**
  * Gerçek hayata yakın hibrit senaryo:
@@ -36,34 +29,25 @@ import io.github.bonigarcia.wdm.WebDriverManager;
  * Bu testin sağlıklı çalışması için etkileşimli bir masaüstü oturumu ve
  * işletim sistemi temanıza göre alınmış görsel şablonlar gerekir.
  */
-class SikuliXNativeFileUploadTest {
+class SikuliXNativeFileUploadTest extends BaseUiTest {
 
-    private WebDriver driver;
-
-    @AfterEach
-    void tearDown() {
-        if (driver != null) {
-            // driver.quit();
-        }
+    @Override
+    protected boolean shouldQuitDriverAfterEach() {
+        return false;
     }
 
     @Test
     void uploadFileUsingNativeDialogWithSikuliX() throws Exception {
-        WebDriverManager.chromedriver().setup();
+        FileUploadPage page = new FileUploadPage(driver, wait);
 
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--start-maximized");
-        driver = new ChromeDriver(options);
-
-        driver.get("https://the-internet.herokuapp.com/upload");
+        page.open();
 
         // Selenium file input elemanını yine DOM üzerinden bulur.
         // Ancak bazı driver/browser kombinasyonları input[type=file] için
         // Selenium click() çağrısını reddedebilir.
         // Bu yüzden elemanın ekrandaki görüntüsünü alıp SikuliX pattern'ine çeviriyoruz
         // ve tıklamayı görsel olarak yaptırıyoruz.
-        WebElement fileInput = new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.elementToBeClickable(By.id("file-upload")));
+        WebElement fileInput = page.waitForFileInput();
 
         Screen screen = new Screen();
         BufferedImage chooseFileImage = ImageIO.read(new ByteArrayInputStream(fileInput.getScreenshotAs(OutputType.BYTES)));
@@ -150,13 +134,13 @@ class SikuliXNativeFileUploadTest {
             screen.click(bestOpenMatch);
         }
 
-        driver.findElement(By.id("file-submit")).click();
+        page.submitUpload();
 
-        String uploaded = new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.visibilityOfElementLocated(By.id("uploaded-files")))
-                .getText();
+        String uploaded = page.waitForUploadedFileName();
+        String successHeading = page.waitForUploadSuccessHeading();
 
         assertTrue(uploaded.contains("README.md"));
+        assertEquals("File Uploaded!", successHeading);
     }
 
     private Pattern resourcePattern(String resourcePath, float similarity) {
