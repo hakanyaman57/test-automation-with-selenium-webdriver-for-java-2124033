@@ -5,6 +5,9 @@ Loaded pattern /images/file_name_input.png from file:/C:/Users/hacka/VS%20Code%2
 Loaded pattern /images/open_button.png from file:/C:/Users/hacka/VS%20Code%20Projects/test-automation-with-selenium-webdriver-for-java-2124033/target/test-classes/images/open_button.png with similarity 0,95
 pictures.png: found 1 candidate(s); best score=1,0000 at x=59 y=220 w=70 h=18
 pictures.png: candidate[0] score=1,0000 at x=59 y=220 w=70 h=18
-[log] CLICK on L[94,229]@S(0) (574 msec)
-[log] CLICK on L[296,325]@S(0) (578 msec)
+[log] CLICK on L[94,229]@S(0) (562 msec)
+[log] CLICK on L[296,325]@S(0) (562 msec)
 [log] TYPE "C:\Users\hacka\VS Code Projects\test-automation-with-selenium-webdriver-for-java-2124033\README.md"
+open_button.png: no match found at similarity 0,95
+Bir�ok native dosya penceresi ENTER tu?unu Open olarak kabul etti?i i�in ENTER ile devam ediliyor.
+[log] TYPE "#ENTER."
