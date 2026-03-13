@@ -67,13 +67,16 @@ class SikuliXNativeFileUploadTest {
         screen.wait(chooseFileButton, 10);
         screen.click(chooseFileButton); // opens native OS dialog visually
 
-        // These two images must come from the native Windows/macOS file chooser dialog,
+        // These images must come from the native Windows/macOS file chooser dialog,
         // not from the browser page itself.
+        Pattern picturesLocation = new Pattern("src/test/resources/images/pictures.png");
         Pattern fileNameInput = new Pattern("src/test/resources/images/file_name_input.png");
         Pattern openButton = new Pattern("src/test/resources/images/open_button.png");
 
         Path fileToUpload = Path.of("README.md").toAbsolutePath();
 
+        screen.wait(picturesLocation, 10);
+        screen.click(picturesLocation);
         screen.wait(fileNameInput, 10);
         screen.click(fileNameInput);
         screen.type(fileToUpload.toString());
