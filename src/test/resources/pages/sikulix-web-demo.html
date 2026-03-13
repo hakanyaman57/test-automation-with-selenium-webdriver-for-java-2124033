@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SikuliX Web Demo</title>
+    <style>
+        :root {
+            --bg-top: #f5efe4;
+            --bg-bottom: #e6dcc8;
+            --panel: #fffaf0;
+            --text: #293241;
+            --muted: #5b6573;
+            --button: #d86f34;
+            --button-text: #fff7ee;
+            --status-idle: #7a8494;
+            --status-success: #2f7d4b;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
+            font-family: "Avenir Next", "Segoe UI", sans-serif;
+            color: var(--text);
+        }
+
+        .panel {
+            width: min(92vw, 760px);
+            padding: 48px;
+            border-radius: 28px;
+            background: var(--panel);
+            box-shadow: 0 24px 60px rgba(41, 50, 65, 0.16);
+            text-align: center;
+        }
+
+        h1 {
+            margin: 0 0 12px;
+            font-size: 40px;
+            letter-spacing: 0.02em;
+        }
+
+        p {
+            margin: 0 0 28px;
+            color: var(--muted);
+            font-size: 18px;
+        }
+
+        button {
+            border: 0;
+            border-radius: 18px;
+            padding: 18px 34px;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            color: var(--button-text);
+            background: var(--button);
+            box-shadow: 0 12px 30px rgba(216, 111, 52, 0.3);
+            cursor: pointer;
+        }
+
+        .status {
+            display: inline-block;
+            margin-top: 28px;
+            padding: 12px 18px;
+            border-radius: 999px;
+            font-family: "Menlo", "Consolas", monospace;
+            font-size: 18px;
+            color: white;
+            background: var(--status-idle);
+        }
+
+        .status.success {
+            background: var(--status-success);
+        }
+    </style>
+</head>
+<body>
+<main class="panel">
+    <h1>SikuliX Hybrid Demo</h1>
+    <p>Selenium sayfayi acacak, SikuliX butonu goruntu olarak bulup tiklayacak.</p>
+    <button id="sikuli-button" type="button">CLICK WITH SIKULIX</button>
+    <div id="status" class="status">Waiting for click</div>
+</main>
+
+<script>
+    const button = document.getElementById("sikuli-button");
+    const status = document.getElementById("status");
+
+    button.addEventListener("click", () => {
+        status.textContent = "Clicked with SikuliX";
+        status.classList.add("success");
+    });
+</script>
+</body>
+</html>
