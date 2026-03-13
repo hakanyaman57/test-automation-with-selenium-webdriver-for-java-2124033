@@ -2,7 +2,6 @@ package examples;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.OutputType;
@@ -35,7 +34,6 @@ class SikuliXWebPageHybridTest {
     }
 
     @Test
-    @Disabled("Educational demo: requires an interactive desktop session and SikuliX permissions on macOS.")
     void shouldUseSeleniumForThePageAndSikuliXForOneVisualStep() throws Exception {
         // Selenium still opens the browser and handles normal page navigation.
         WebDriverManager.chromedriver().setup();
@@ -73,8 +71,7 @@ class SikuliXWebPageHybridTest {
         // If the click worked, the page changes the status text.
         String updatedStatus = wait.until(ExpectedConditions.textToBePresentInElementLocated(
                 By.id("status"),
-                "Clicked with SikuliX"
-        )) ? driver.findElement(By.id("status")).getText() : "";
+                "Clicked with SikuliX")) ? driver.findElement(By.id("status")).getText() : "";
 
         assertEquals("Clicked with SikuliX", updatedStatus);
     }

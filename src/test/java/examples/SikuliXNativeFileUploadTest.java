@@ -23,7 +23,8 @@ import io.github.bonigarcia.wdm.WebDriverManager;
  * - Selenium opens the web page and clicks "Browse"
  * - SikuliX drives the native file chooser window
  *
- * This test is disabled by default because it needs an interactive desktop session
+ * This test is disabled by default because it needs an interactive desktop
+ * session
  * and template images captured from your own OS theme.
  */
 class SikuliXNativeFileUploadTest {
@@ -33,12 +34,11 @@ class SikuliXNativeFileUploadTest {
     @AfterEach
     void tearDown() {
         if (driver != null) {
-            driver.quit();
+            // driver.quit();
         }
     }
 
     @Test
-   // @Disabled("Manual demo: requires desktop session + image templates in src/test/resources/images")
     void uploadFileUsingNativeDialogWithSikuliX() throws Exception {
         WebDriverManager.chromedriver().setup();
 
@@ -47,9 +47,9 @@ class SikuliXNativeFileUploadTest {
         driver = new ChromeDriver(options);
 
         driver.get("https://the-internet.herokuapp.com/upload");
-
+        Thread.sleep(3000);
         WebElement fileInput = new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.elementToBeClickable(By.id("file-upload")));
+                .until(ExpectedConditions.elementToBeClickable(By.cssSelector("input[name='file']")));
         fileInput.click(); // opens native OS dialog
 
         Screen screen = new Screen();
